@@ -1,0 +1,3 @@
+[submodule "examples/pd/regexdepauvre"]
+	path = examples/pd/regexdepauvre
+	url = https://github.com/gllmAR/regexdepauvre
