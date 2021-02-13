@@ -30,6 +30,7 @@ byte LED_1_BRIGHTNESS = 0;
 #define BTN_1_PIN 3
 bool btn_1_state = 0;
 bool btn_1_flag = 0;
+bool btn_1_old = 0;
 bool send_message_flag = 0;
 
 // GLOBAL VARs
@@ -62,7 +63,7 @@ void setup()
     Serial.begin(9600);
   }
   test_hardware();
-  attachInterrupt(digitalPinToInterrupt(BTN_1_PIN), raise_btn_1_flag, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(BTN_1_PIN), raise_btn_1_flag, FALLING);
   init_DHCP();
   print_status();
   broadcast_message();
@@ -90,19 +91,24 @@ void update_btn_1_state()
     {
       btn_1_state = digitalRead(BTN_1_PIN);
       btn_1_flag = 0;
+    }
+    if (btn_1_old != btn_1_state)
+    {
       send_message_flag = 1;
-      if (SERIAL_DEBUG)
-      {
-        String payload = "/";
-        payload += UID;
-        payload += "/";
-        payload += "btn_1_state/";
-        payload += btn_1_state;
-        Serial.println(payload);
-      }
+      btn_1_old = btn_1_state;
+    }
+    if (SERIAL_DEBUG)
+    {
+      String payload = "/";
+      payload += UID;
+      payload += "/";
+      payload += "btn_1_state/";
+      payload += btn_1_state;
+      Serial.println(payload);
     }
   }
 }
+
 
 void init_DHCP()
 {
@@ -157,7 +163,6 @@ String ip_to_string(IPAddress address)
 
 void test_hardware()
 {
-
   //led
   int delay_ms = 5;
   for (int i = 0; i < 255; i++)
@@ -295,9 +300,4 @@ void broadcast_message()
   msg.send(Udp); // send the bytes to the SLIP stream
   Udp.endPacket(); // mark the end of the OSC Packet
   msg.empty(); // free space occupied by message
-}
-
-void route_led_1_brightness (OSCMessage & msg, int addrOffset )
-{
-
 }
